@@ -48,11 +48,11 @@ The core of the notebook follows one sentence through every stage, with the actu
 flowchart TB
     subgraph ING["Ingestion (offline — once per document)"]
         direction TB
-        A[📄 PDF] --> B[Text extraction<br/>PyMuPDF] --> C[Chunking<br/>20 words / 4 overlap] --> D[Embedding<br/>all-MiniLM-L6-v2, 384-d] --> E[(ChromaDB<br/>vectors + text + metadata)]
+        A[PDF] --> B[Text extraction<br/>PyMuPDF] --> C[Chunking<br/>20 words / 4 overlap] --> D[Embedding<br/>all-MiniLM-L6-v2, 384-d] --> E[(ChromaDB<br/>vectors + text + metadata)]
     end
     subgraph QUERY["Query time (online — per question)"]
         direction TB
-        Q[❓ User question] --> QE[Query embedding<br/>same model] --> S[Cosine similarity<br/>vs all chunks] --> K[Top-K retrieval] --> R[Cross-encoder<br/>re-ranking] --> P[Prompt<br/>system + context + question] --> L[🤖 LLM] --> AN[✅ Answer + source citation]
+        Q[User question] --> QE[Query embedding<br/>same model] --> S[Cosine similarity<br/>vs all chunks] --> K[Top-K retrieval] --> R[Cross-encoder<br/>re-ranking] --> P[Prompt<br/>system + context + question] --> L[LLM] --> AN[Answer + source citation]
     end
     E --> S
 ```
