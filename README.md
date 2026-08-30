@@ -77,7 +77,12 @@ The two phases are kept strictly separate in the notebook: ingestion runs once, 
 
 ## What's in the notebook
 
-25 sections, each with definition → intuition → math → code → real output → summary → interview question:
+25 sections, each with definition → intuition → math → code → real output → summary → interview question.
+The embedding core is a **10-lesson deep dive** that follows one sentence through the entire journey:
+
+1. What is a token? → 2. What is a token ID? → 3. What is an embedding? → 4. What is an embedding matrix? → 5. How does a token ID select a vector? → 6. Where do embedding values come from? → 7. How are embedding parameters learned? (real autograd) → 8. How does the Transformer transform token representations? → 9. How do we get one final chunk embedding? → 10. How does this enter the vector DB?
+
+Sections:
 
 1. RAG overview
 2. PDF text extraction
