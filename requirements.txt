@@ -1,0 +1,17 @@
+# Core pipeline
+pymupdf>=1.24          # PDF creation + text extraction
+sentence-transformers>=3.0   # all-MiniLM-L6-v2 embeddings + cross-encoder re-ranker
+chromadb>=0.5          # local vector database (cosine space)
+
+# Math / visuals
+numpy
+scikit-learn           # PCA, cosine_similarity
+matplotlib
+pandas
+ipywidgets             # interactive cells
+
+# LLM call (raw REST — no SDK needed)
+requests
+
+# Note: Google Colab preinstalls most of these.
+# The notebook's first cell installs/upgrades everything automatically.
