@@ -112,6 +112,7 @@ Sections:
 
 ## Run it
 
+### Option 1 — Colab Notebook
 1. Open the notebook in Colab:
 
    [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AjmalDanish/mini-rag-learning-lab/blob/main/Mini_RAG_Learning_Lab.ipynb)
@@ -121,18 +122,70 @@ Sections:
 
 Expected runtime on a free Colab CPU: ~5–10 minutes, mostly model downloads (~90 MB each for MiniLM and the cross-encoder).
 
+### Option 2 — Interactive Dashboard
+A premium Streamlit dashboard with pipeline visualization, live query demo, and analytics:
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Features:
+- **Overview** — animated pipeline flow, metrics, feature cards
+- **Pipeline Explorer** — stage-by-stage tabs (extraction, chunking, tokenization, embeddings, vector DB)
+- **Live Demo** — real-time query with cross-encoder re-ranking and scoring charts
+- **Analytics** — cosine matrix heatmap, PCA projection, chunk similarity plots
+- **Interview Prep** — Q&A cards and one-page cheat sheet
+
+### Option 3 — Run Tests
+```bash
+pip install pytest
+python -m pytest tests/ -v
+```
+
 ## Repository layout
 
 ```
 mini-rag-learning-lab/
 ├── Mini_RAG_Learning_Lab.ipynb   # the whole project: 25 sections, all outputs included
+├── app.py                        # Streamlit dashboard (premium UI/UX)
+├── main.py                       # CLI entry point for the RAG pipeline
+├── config.yaml                   # configuration for all components
 ├── README.md
-├── requirements.txt              # exact dependencies (Colab preinstalls most of them)
+├── requirements.txt              # exact dependencies
+├── src/                          # modular source code
+│   ├── __init__.py
+│   ├── ingestion/
+│   │   ├── __init__.py
+│   │   └── loader.py             # PDF text extraction
+│   ├── chunking/
+│   │   ├── __init__.py
+│   │   └── chunker.py            # text chunking strategies
+│   ├── embeddings/
+│   │   ├── __init__.py
+│   │   └── embedder.py           # sentence-transformers wrapper
+│   ├── vectordb/
+│   │   ├── __init__.py
+│   │   └── vector_store.py       # ChromaDB operations
+│   ├── retrieval/
+│   │   ├── __init__.py
+│   │   └── retriever.py          # retrieval + re-ranking
+│   ├── prompts/
+│   │   ├── __init__.py
+│   │   └── prompt_templates.py   # RAG prompt building
+│   ├── llm/
+│   │   ├── __init__.py
+│   │   └── llm_client.py         # OpenAI-compatible API client
+│   └── utils/
+│       ├── __init__.py
+│       └── helpers.py            # utility functions
+├── tests/
+│   └── test_core.py              # 23 unit tests
 ├── docs/
-│   └── Project_Explainer.pdf     # written explanation of every stage + interview Q&A
+│   └── Project_Explainer.pdf     # written explanation of every stage
 └── assets/
-    ├── pipeline.png              # architecture diagram with real numbers
-    └── cosine_scores.png         # real similarity scores from the run
+    ├── pipeline.png              # architecture diagram
+    └── cosine_scores.png         # real similarity scores
 ```
 
 ## Interview notes

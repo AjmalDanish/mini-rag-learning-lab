@@ -13,5 +13,15 @@ ipywidgets             # interactive cells
 # LLM call (raw REST — no SDK needed)
 requests
 
+# PDF generation for docs/Project_Explainer.pdf
+reportlab>=4.0
+
+# Testing
+pytest>=7.0
+
+# Interactive dashboard
+streamlit>=1.30
+plotly>=5.18
+
 # Note: Google Colab preinstalls most of these.
 # The notebook's first cell installs/upgrades everything automatically.
