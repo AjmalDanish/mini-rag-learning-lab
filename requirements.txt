@@ -1,3 +1,6 @@
+# CPU-only torch (keeps cloud installs small; ignored where PyPI torch is already CPU)
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core pipeline
 pymupdf>=1.24          # PDF creation + text extraction
 sentence-transformers>=3.0   # all-MiniLM-L6-v2 embeddings + cross-encoder re-ranker
