@@ -2,6 +2,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Live demo](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mini-rag-lab.streamlit.app/)
 [![CI](https://github.com/AjmalDanish/mini-rag-learning-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/AjmalDanish/mini-rag-learning-lab/actions/workflows/ci.yml)
 
 A complete RAG (Retrieval-Augmented Generation) pipeline built from scratch — **no LangChain, no hidden abstractions**. Every intermediate value is printed: tokens, token IDs, embedding vectors, similarity scores, re-ranking scores, the exact prompt, and the final grounded answer.
