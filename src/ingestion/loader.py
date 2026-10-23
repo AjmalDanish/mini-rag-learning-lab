@@ -4,6 +4,26 @@ import os
 import pymupdf
 
 
+# Demo document used by the CLI demo, the dashboard, and the tests.
+SAMPLE_POLICY = """COMPANY LEAVE POLICY
+
+Annual Leave:
+Employees receive 18 days of annual leave per year.
+
+Sick Leave:
+Employees receive 10 days of paid sick leave per year.
+
+Maternity Leave:
+Female employees receive 26 weeks of paid maternity leave.
+
+Paternity Leave:
+Employees receive 7 days of paid paternity leave.
+
+Work From Home:
+Employees may work remotely up to 2 days per week with manager approval.
+"""
+
+
 def create_pdf(path: str, text: str) -> str:
     """Create a PDF file from text."""
     doc = pymupdf.open()

@@ -1,8 +1,11 @@
 """Embedding model wrapper using sentence-transformers."""
 
+import logging
+
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 FALLBACK_MODEL = "sentence-transformers/paraphrase-MiniLM-L6-v2"
@@ -21,7 +24,7 @@ class Embedder:
         try:
             self.model = SentenceTransformer(model_name)
         except Exception:
-            print(f"WARNING: Could not load {model_name}, trying fallback")
+            logger.warning("Could not load %s, trying fallback", model_name)
             self.model_name = FALLBACK_MODEL
             self.model = SentenceTransformer(FALLBACK_MODEL)
     

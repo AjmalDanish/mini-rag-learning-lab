@@ -8,9 +8,9 @@ embedding:
 
 # Chunking settings
 chunking:
-  chunk_size_words: 20
+  chunk_size_words: 20  # max words per chunk (sentence) or window size (naive)
   overlap_words: 4
-  strategy: "naive"  # naive | sentence
+  strategy: "sentence"  # naive | sentence  (sentence keeps facts like "26 weeks" in one chunk)
 
 # Vector database settings
 vectordb:

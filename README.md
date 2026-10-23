@@ -2,7 +2,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)](tests/)
+[![CI](https://github.com/AjmalDanish/mini-rag-learning-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/AjmalDanish/mini-rag-learning-lab/actions/workflows/ci.yml)
 
 A complete RAG (Retrieval-Augmented Generation) pipeline built from scratch — **no LangChain, no hidden abstractions**. Every intermediate value is printed: tokens, token IDs, embedding vectors, similarity scores, re-ranking scores, the exact prompt, and the final grounded answer.
 
@@ -18,12 +18,21 @@ cd mini-rag-learning-lab
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the CLI demo
+# Run the CLI demo (sample leave policy)
 python main.py
+
+# Index your own PDFs (files or folders; persisted in ./chroma_db), then ask
+python main.py --ingest path/to/pdfs/
+python main.py "What is the refund policy?"
 
 # Or launch the dashboard
 streamlit run app.py
+
+# Or run the dashboard in Docker
+docker build -t mini-rag . && docker run -p 8501:8501 mini-rag
 ```
+
+**Real LLM answers:** set `OPENAI_API_KEY` (optionally `OPENAI_BASE_URL` and `LLM_MODEL` for Groq, Gemini, Ollama, or any OpenAI-compatible endpoint). Without a key the CLI runs in demo mode and returns the top retrieved chunk. Chunking, models, and retrieval settings live in [`config.yaml`](config.yaml).
 
 ## What It Does
 
@@ -64,10 +73,11 @@ flowchart TB
 mini-rag-learning-lab/
 ├── main.py                       # CLI entry point
 ├── app.py                        # Streamlit dashboard
-├── config.yaml                   # pipeline configuration
+├── config.yaml                   # pipeline configuration (read by src/pipeline.py)
 ├── requirements.txt              # dependencies
 │
 ├── src/                          # modular source code
+│   ├── pipeline.py               # RAGPipeline: ingest() + ask(), wires everything below
 │   ├── ingestion/loader.py       # PDF text extraction
 │   ├── chunking/chunker.py       # text chunking strategies
 │   ├── embeddings/embedder.py    # sentence-transformers wrapper
@@ -77,7 +87,7 @@ mini-rag-learning-lab/
 │   ├── llm/llm_client.py         # OpenAI-compatible API client
 │   └── utils/helpers.py          # utility functions
 │
-├── tests/test_core.py            # 23 unit tests
+├── tests/test_core.py            # unit + end-to-end tests (run in CI)
 ├── Mini_RAG_Learning_Lab.ipynb   # notebook (25 sections)
 ├── docs/Project_Explainer.pdf    # written explanation
 └── assets/                       # diagrams and screenshots
@@ -137,7 +147,7 @@ This project demonstrates understanding of:
 python -m pytest tests/ -v
 ```
 
-23 tests covering: chunking, prompt building, PDF extraction, cosine similarity, one-hot equivalence, and notebook structure validation.
+25 tests covering chunking, prompt building, PDF extraction, cosine similarity, notebook structure, and an end-to-end ingest → retrieve → re-rank check. They run on every push via GitHub Actions.
 
 ## License
 

@@ -1,0 +1,7 @@
+.git
+.github
+chroma_db
+data
+__pycache__
+*.ipynb
+docs

@@ -231,3 +231,37 @@ class TestNotebookStructure:
             if cell["cell_type"] == "markdown":
                 content = "".join(cell["source"]).strip()
                 assert content != "", f"Markdown cell {i} is empty"
+
+
+# ---------------------------------------------------------------------------
+# End-to-end pipeline (downloads the MiniLM models on first run)
+# ---------------------------------------------------------------------------
+class TestPipeline:
+    def test_ingest_and_ask(self, tmp_path, monkeypatch):
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from src.pipeline import RAGPipeline, load_config
+        from src.ingestion import SAMPLE_POLICY
+
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        cfg = load_config()
+        cfg["vectordb"]["persist_dir"] = str(tmp_path / "db")
+        rag = RAGPipeline(cfg)
+
+        pdf = create_pdf(str(tmp_path / "policy.pdf"), SAMPLE_POLICY)
+        n = rag.ingest(pdf)
+        assert n > 0
+        assert rag.ingest(pdf) == n and rag.store.count == n  # re-ingest replaces, no duplicates
+
+        result = rag.ask("How many weeks of maternity leave are available?")
+        text, meta, _ = result["sources"][0]
+        assert "26 weeks" in text
+        assert meta["source"] == "policy.pdf" and meta["page"] == 1
+        assert "26 weeks" in result["prompt"]
+
+    def test_ask_empty_store(self, tmp_path):
+        from src.pipeline import RAGPipeline, load_config
+
+        cfg = load_config()
+        cfg["vectordb"]["persist_dir"] = str(tmp_path / "db")
+        with pytest.raises(RuntimeError):
+            RAGPipeline(cfg).ask("anything")

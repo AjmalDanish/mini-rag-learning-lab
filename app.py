@@ -392,7 +392,6 @@ def load_models():
     from sentence_transformers import SentenceTransformer, CrossEncoder
     from transformers import AutoTokenizer
     import chromadb
-    import pymupdf
 
     MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
     CROSS_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -401,56 +400,12 @@ def load_models():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     cross = CrossEncoder(CROSS_MODEL)
 
-    # Create PDF
-    POLICY_TEXT = """COMPANY LEAVE POLICY
+    from src.chunking import chunk_text
+    from src.ingestion import SAMPLE_POLICY as POLICY_TEXT, create_pdf, extract_pdf
 
-Annual Leave:
-Employees receive 18 days of annual leave per year.
-
-Sick Leave:
-Employees receive 10 days of paid sick leave per year.
-
-Maternity Leave:
-Female employees receive 26 weeks of paid maternity leave.
-
-Paternity Leave:
-Employees receive 7 days of paid paternity leave.
-
-Work From Home:
-Employees may work remotely up to 2 days per week with manager approval.
-"""
-    pdf_path = "leave_policy.pdf"
-    doc = pymupdf.open()
-    page = doc.new_page()
-    rect = pymupdf.Rect(72, 72, page.rect.width - 72, page.rect.height - 72)
-    page.insert_textbox(rect, POLICY_TEXT, fontsize=13, fontname="helv")
-    doc.save(pdf_path)
-    doc.close()
-
-    # Extract text
-    doc = pymupdf.open(pdf_path)
-    pages = []
-    for page_no, page in enumerate(doc, start=1):
-        pages.append({
-            "text": page.get_text().strip(),
-            "metadata": {"source": os.path.basename(pdf_path), "page": page_no},
-        })
-    doc.close()
+    pdf_path = create_pdf("leave_policy.pdf", POLICY_TEXT)
+    pages = extract_pdf(pdf_path)
     full_text = " ".join(p["text"] for p in pages)
-
-    # Chunk
-    def chunk_text(text, chunk_size_words=20, overlap_words=4):
-        words = text.split()
-        chunks, i = [], 0
-        while i < len(words):
-            chunk_words = words[i:i + chunk_size_words]
-            if not chunk_words:
-                break
-            chunks.append(" ".join(chunk_words))
-            if i + chunk_size_words >= len(words):
-                break
-            i += chunk_size_words - overlap_words
-        return chunks
 
     chunks = chunk_text(full_text)
 

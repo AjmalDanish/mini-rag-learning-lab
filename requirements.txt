@@ -12,6 +12,7 @@ ipywidgets             # interactive cells
 
 # LLM call (raw REST — no SDK needed)
 requests
+pyyaml                 # config.yaml
 
 # PDF generation for docs/Project_Explainer.pdf
 reportlab>=4.0
