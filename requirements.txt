@@ -1,3 +1,6 @@
+# CPU-only torch (keeps cloud installs small; ignored where PyPI torch is already CPU)
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core pipeline
 pymupdf>=1.24          # PDF creation + text extraction
 sentence-transformers>=3.0   # all-MiniLM-L6-v2 embeddings + cross-encoder re-ranker
@@ -12,6 +15,7 @@ ipywidgets             # interactive cells
 
 # LLM call (raw REST — no SDK needed)
 requests
+pyyaml                 # config.yaml
 
 # PDF generation for docs/Project_Explainer.pdf
 reportlab>=4.0

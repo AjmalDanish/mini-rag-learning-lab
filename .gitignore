@@ -10,3 +10,7 @@ leave_policy.pdf
 # OS
 .DS_Store
 Thumbs.db
+data/
+.env
+.venv/
+.pytest_cache/

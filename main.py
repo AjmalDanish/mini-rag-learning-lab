@@ -1,113 +1,69 @@
-"""Mini RAG Learning Lab - Main entry point."""
+"""Mini RAG Learning Lab - command-line entry point.
 
-import os
-import sys
-
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
-
-from src.ingestion import create_pdf, extract_pdf
-from src.chunking import chunk_text
-from src.embeddings import Embedder
-from src.vectordb import VectorStore
-from src.retrieval import Retriever
-from src.prompts import build_prompt
-from src.llm import LLMClient, demo_answer
-
-
-# Sample policy text for demonstration
-POLICY_TEXT = """COMPANY LEAVE POLICY
-
-Annual Leave:
-Employees receive 18 days of annual leave per year.
-
-Sick Leave:
-Employees receive 10 days of paid sick leave per year.
-
-Maternity Leave:
-Female employees receive 26 weeks of paid maternity leave.
-
-Paternity Leave:
-Employees receive 7 days of paid paternity leave.
-
-Work From Home:
-Employees may work remotely up to 2 days per week with manager approval.
+    python main.py                                  # demo on the sample leave policy
+    python main.py --ingest docs/ report.pdf        # index PDFs (files or folders), persisted in chroma_db/
+    python main.py "How many sick days do I get?"   # ask the indexed documents
+    python main.py "question" --ingest docs/        # both at once (question goes first)
 """
 
+import argparse
+import logging
+import sys
+from pathlib import Path
 
-def run_pipeline(query: str, api_key: str = None) -> dict:
-    """Run the complete RAG pipeline.
-    
-    Args:
-        query: User question.
-        api_key: Optional API key for LLM. If None, uses demo mode.
-        
-    Returns:
-        Dict with answer, sources, and scores.
-    """
-    # Step 1: Create and extract PDF
-    pdf_path = "leave_policy.pdf"
-    create_pdf(pdf_path, POLICY_TEXT)
-    pages = extract_pdf(pdf_path)
-    
-    # Step 2: Chunk text
-    full_text = " ".join(p["text"] for p in pages)
-    chunks = chunk_text(full_text)
-    
-    # Step 3: Generate embeddings
-    embedder = Embedder()
-    chunk_embeddings = embedder.encode(chunks)
-    
-    # Step 4: Store in vector database
-    store = VectorStore()
-    store.clear()
-    
-    metadatas = [{"source": "leave_policy.pdf", "page": 1, "chunk_index": i}
-                 for i in range(len(chunks))]
-    
-    store.add(chunks, chunk_embeddings.tolist(), metadatas)
-    
-    # Step 5: Retrieve and rerank
-    retriever = Retriever()
-    query_embedding = embedder.encode(query)
-    
-    results = retriever.retrieve(
-        query_embedding,
-        chunk_embeddings,
-        chunks,
-        metadatas,
-        top_k=3,
-    )
-    
-    results = retriever.rerank(query, results)
-    
-    # Step 6: Build prompt and generate answer
-    docs_with_meta = [(text, meta) for text, meta, _ in results]
-    prompt = build_prompt(query, docs_with_meta)
-    
-    if api_key:
-        client = LLMClient(api_key=api_key)
-        answer = client.generate(prompt)
-    else:
-        answer = demo_answer(query, [text for text, _, _ in results])
-    
-    return {
-        "answer": answer,
-        "sources": [(text, meta, score) for text, meta, score in results],
-        "prompt": prompt,
-    }
+from src.ingestion import SAMPLE_POLICY, create_pdf
+from src.pipeline import RAGPipeline
+
+DEMO_QUESTION = "How many weeks of maternity leave are available?"
 
 
-if __name__ == "__main__":
-    # Example usage
-    query = "How many weeks of maternity leave are available?"
-    result = run_pipeline(query)
-    
+def pdf_paths(targets: list[str]) -> list[Path]:
+    """Expand files and folders into a list of PDF paths."""
+    paths = []
+    for t in map(Path, targets):
+        if t.is_dir():
+            paths.extend(sorted(t.glob("*.pdf")))
+        elif t.suffix.lower() == ".pdf" and t.exists():
+            paths.append(t)
+        else:
+            sys.exit(f"Not a PDF or folder: {t}")
+    return paths
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Ask questions over your PDFs.")
+    parser.add_argument("question", nargs="?", help="question to ask (omit for the demo)")
+    parser.add_argument("--ingest", nargs="+", metavar="PATH", help="PDF files or folders to index")
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
+
+    rag = RAGPipeline()
+
+    if args.ingest:
+        for path in pdf_paths(args.ingest):
+            print(f"Indexed {rag.ingest(path):>4} chunks  {path}")
+        if not args.question:
+            return
+
+    question = args.question
+    if question is None:
+        Path("data").mkdir(exist_ok=True)
+        rag.ingest(create_pdf("data/leave_policy.pdf", SAMPLE_POLICY))
+        question = DEMO_QUESTION
+
+    try:
+        result = rag.ask(question)
+    except RuntimeError as e:
+        sys.exit(str(e))
+
     print("=" * 60)
-    print("QUERY:", query)
+    print("QUESTION:", question)
     print("=" * 60)
     print("\nANSWER:", result["answer"])
     print("\nSOURCES:")
     for text, meta, score in result["sources"]:
-        print(f"  [{score:.3f}] {text[:100]}...")
-        print(f"         Source: {meta['source']}, page {meta['page']}")
+        print(f"  [{score:.3f}] {meta['source']} p.{meta['page']}: {' '.join(text.split())[:90]}")
+
+
+if __name__ == "__main__":
+    main()

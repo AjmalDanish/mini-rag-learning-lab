@@ -1,5 +1,7 @@
 """Retrieval and re-ranking for RAG."""
 
+import logging
+
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -9,6 +11,7 @@ try:
 except ImportError:
     CROSS_ENCODER_AVAILABLE = False
 
+logger = logging.getLogger(__name__)
 
 DEFAULT_CROSS_ENCODER = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
@@ -27,7 +30,7 @@ class Retriever:
             try:
                 self.cross_encoder = CrossEncoder(cross_encoder_name)
             except Exception:
-                print(f"WARNING: Could not load cross-encoder {cross_encoder_name}")
+                logger.warning("Could not load cross-encoder %s", cross_encoder_name)
     
     def retrieve(
         self,

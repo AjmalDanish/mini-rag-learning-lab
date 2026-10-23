@@ -25,12 +25,17 @@ class VectorStore:
         if existing:
             self.collection.delete(ids=existing)
     
+    def delete_source(self, source: str) -> None:
+        """Remove every chunk that came from the given source file."""
+        self.collection.delete(where={"source": source})
+
     def add(
         self,
         chunks: list[str],
         embeddings: list[list[float]],
         metadatas: list[dict] | None = None,
         prefix: str = "chunk",
+        ids: list[str] | None = None,
     ) -> int:
         """Add documents to the collection.
         
@@ -38,12 +43,13 @@ class VectorStore:
             chunks: List of text chunks.
             embeddings: List of embedding vectors.
             metadatas: Optional metadata for each chunk.
-            prefix: ID prefix for chunks.
+            prefix: ID prefix for chunks (used when ids is None).
+            ids: Explicit chunk IDs.
             
         Returns:
             Number of chunks added.
         """
-        ids = [f"{prefix}_{i:02d}" for i in range(len(chunks))]
+        ids = ids or [f"{prefix}_{i:02d}" for i in range(len(chunks))]
         if metadatas is None:
             metadatas = [{} for _ in chunks]
         
